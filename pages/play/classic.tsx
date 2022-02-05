@@ -37,7 +37,7 @@ const ClassicPage: NextPage = () => {
   }, [current]);
 
   useEffect(() => {
-    if (guesses.length === 6) {
+    if (guesses.length === 6 || guesses.includes(word)) {
       setGameOver(true);
     }
   }, [guesses]);
