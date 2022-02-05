@@ -12,27 +12,39 @@ const defaultColors = () => {
 };
 
 const ClassicPage: NextPage = () => {
-  const [guesses, setGuesses] = useState<String[]>([
-    "qwert",
-    "gdfrs",
-    "gswer",
-    "kopyu",
-    "asdsa",
-    "cwgrd",
-  ]);
+  const [guesses, setGuesses] = useState<String[]>([]);
   const [colors, setColors] = useState<
     ("default" | "wrongPosition" | "correctPosition")[][]
   >(defaultColors());
   const [word, setWord] = useState<String>("reeds");
-  const [current, setCurrent] = useState<String>("redde");
+  const [current, setCurrent] = useState<String>("");
+  const [gameOver, setGameOver] = useState<boolean>(false);
 
   useEffect(() => {
-    calculateMove();
-    // console.log(colors);
-  }, []);
+    if (gameOver) return;
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key.length === 1 && e.key.match(/[a-z]/i)) {
+        setCurrent((prev) => (prev + e.key.toLowerCase()).substr(0, 5));
+      } else if (e.key === "Backspace") {
+        setCurrent((prev) => prev.substring(0, prev.length - 1));
+      } else if (e.key === "Enter" && current.length === 5) {
+        calculateMove();
+      }
+    };
+    document.addEventListener("keyup", handleKeyUp);
+
+    return () => document.removeEventListener("keyup", handleKeyUp);
+  }, [current]);
+
+  useEffect(() => {
+    if (guesses.length === 6) {
+      setGameOver(true);
+    }
+  }, [guesses]);
 
   const populateGuess = (guessNumber: number, charNumber: number): string => {
-    if (guesses.length < guessNumber) return "";
+    if (guesses.length < guessNumber - 1) return "";
+    if (guesses.length === guessNumber - 1) return current.charAt(charNumber);
     return guesses[guessNumber - 1].charAt(charNumber);
   };
 
@@ -50,6 +62,7 @@ const ClassicPage: NextPage = () => {
   };
 
   const calculateMove = () => {
+    console.log(current);
     //TODO: check if typed word is valid
     const _colors = new Array(5).fill("default");
     const repeats = new Map<String, number>();
@@ -61,37 +74,38 @@ const ClassicPage: NextPage = () => {
         repeats.set(c, (repeats.get(c) ?? 0) + 1);
       }
     });
-    console.log("repeats:", repeats);
     current.split("").forEach((c, i) => {
-      console.log(c, i);
       if (repeats.has(c)) {
         if (word.charAt(i) == c) {
           _colors[i] = "correctPosition";
           repeats.set(c, (repeats.get(c) ?? 0) - 1);
           if ((repeats.get(c) ?? 0) < 0) {
-            console.log("decrement");
             const newList: number[] = repeatsIndices.get(c) ?? [0];
             const oldIndex = newList.pop() || 0;
             _colors[oldIndex] = "default";
             repeatsIndices.set(c, newList);
           }
-          console.log("UPDATE:", _colors, repeats, repeatsIndices);
         } else if (word.includes(c)) {
           _colors[i] = "wrongPosition";
           repeats.set(c, (repeats.get(c) ?? 0) - 1);
           repeatsIndices.set(c, getIndicies(repeatsIndices, c, i));
           if ((repeats.get(c) ?? 0) < 0) {
-            console.log("decrement");
             const newList: number[] = repeatsIndices.get(c) ?? [0];
             const oldIndex = newList.pop() || 0;
             _colors[oldIndex] = "default";
             repeatsIndices.set(c, newList);
           }
-          console.log(i, "UPDATE:", _colors, repeats, repeatsIndices);
         }
       }
     });
-    console.log("colors:::", _colors);
+    const guessNumber = guesses.length;
+    const tempColors = [...colors];
+    let replaceColor = { ...tempColors[guessNumber] };
+    replaceColor = _colors;
+    tempColors[guessNumber] = replaceColor;
+    setGuesses((prev) => [...prev, current]);
+    setColors(tempColors);
+    setCurrent("");
   };
 
   return (

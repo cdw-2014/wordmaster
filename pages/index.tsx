@@ -32,7 +32,7 @@ const Home: NextPage = () => {
 
       <div className={styles.grid}>
         <div className={styles.card}>
-          <Link href="/play/classic" as="/play">
+          <Link href="/play/classic" as="/play/classic">
             <a>
               <h2>Classic &rarr;</h2>
               <p>
