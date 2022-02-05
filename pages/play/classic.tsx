@@ -1,23 +1,28 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import GameTile from "../../components/GameTile";
 import KeyboardTile from "../../components/KeyboardTile";
+import { ALL_WORDS } from "../../constants/validWords";
 import styles from "../../styles/Play.module.css";
+
+interface Props {
+  solution: string;
+}
 
 const defaultColors = () => {
   return new Array(6).fill(new Array(5).fill("default"));
 };
 
-const ClassicPage: NextPage = () => {
-  const [guesses, setGuesses] = useState<String[]>([]);
+const ClassicPage: NextPage<Props> = ({ solution }: Props) => {
+  const [guesses, setGuesses] = useState<string[]>([]);
   const [colors, setColors] = useState<
     ("default" | "wrongPosition" | "correctPosition")[][]
   >(defaultColors());
-  const [word, setWord] = useState<String>("reeds");
-  const [current, setCurrent] = useState<String>("");
+  const [word, setWord] = useState<string>(solution);
+  const [current, setCurrent] = useState<string>("");
   const [gameOver, setGameOver] = useState<boolean>(false);
 
   useEffect(() => {
@@ -62,8 +67,7 @@ const ClassicPage: NextPage = () => {
   };
 
   const calculateMove = () => {
-    console.log(current);
-    //TODO: check if typed word is valid
+    if (!ALL_WORDS.includes(current)) return;
     const _colors = new Array(5).fill("default");
     const repeats = new Map<String, number>();
     const repeatsIndices = new Map<String, number[]>();
@@ -166,6 +170,15 @@ const ClassicPage: NextPage = () => {
       </div>
     </Fragment>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const solution = await fetch("http://localhost:3000/api/word");
+  const data: string = await solution.text();
+  console.log("PROPS:", data);
+  return {
+    props: { solution: data },
+  };
 };
 
 export default ClassicPage;
