@@ -172,7 +172,7 @@ const ClassicPage: NextPage<Props> = ({ solution }: Props) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getStaticProps: GetServerSideProps = async (context) => {
   const solution = await fetch("http://localhost:3000/api/word");
   const data: string = await solution.text();
   console.log("PROPS:", data);
