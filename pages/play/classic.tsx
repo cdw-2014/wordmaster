@@ -1,4 +1,4 @@
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetServerSideProps, GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import GameTile from "../../components/GameTile";
 import KeyboardTile from "../../components/KeyboardTile";
 import { ALL_WORDS } from "../../constants/validWords";
 import styles from "../../styles/Play.module.css";
+import { getWord } from "../api/word";
 
 interface Props {
   solution: string;
@@ -172,12 +173,10 @@ const ClassicPage: NextPage<Props> = ({ solution }: Props) => {
   );
 };
 
-export const getStaticProps: GetServerSideProps = async (context) => {
-  const solution = await fetch("http://localhost:3000/api/word");
-  const data: string = await solution.text();
-  console.log("PROPS:", data);
+export const getStaticProps: GetStaticProps = async (context) => {
+  const solution = getWord();
   return {
-    props: { solution: data },
+    props: { solution: solution },
   };
 };
 
