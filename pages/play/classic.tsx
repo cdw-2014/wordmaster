@@ -121,7 +121,7 @@ const ClassicPage: NextPage<Props> = ({ solution }: Props) => {
       <div className={styles.grid}>
         {Array.from({ length: 6 }).map((_, i) => {
           return (
-            <div className={styles.row}>
+            <div key={i} className={styles.row}>
               <GameTile letter={populateGuess(i + 1, 0)} color={colors[i][0]} />
               <GameTile letter={populateGuess(i + 1, 1)} color={colors[i][1]} />
               <GameTile letter={populateGuess(i + 1, 2)} color={colors[i][2]} />
